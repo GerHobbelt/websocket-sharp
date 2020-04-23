@@ -14,7 +14,7 @@
     <PackageProjectUrl>https://github.com/uhm0311/websocket-sharp</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/uhm0311/websocket-sharp/blob/master/LICENSE.txt</PackageLicenseUrl>
     <PackageIconUrl>https://raw.github.com/uhm0311/websocket-sharp/master/websocket-sharp_icon.png</PackageIconUrl>
-    <PackageTags>websocket;netstandard2.0;net45;net40</PackageTags>
+    <PackageTags>websocket;WebSocket</PackageTags>
     <PackageReleaseNotes>Add auto close option to http server.</PackageReleaseNotes>
     <PackageOutputPath>../nuget</PackageOutputPath>
     <IncludeSymbols>true</IncludeSymbols>
