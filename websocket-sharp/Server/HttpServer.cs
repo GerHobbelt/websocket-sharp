@@ -73,6 +73,7 @@ namespace WebSocketSharp.Server
     private WebSocketServiceManager _services;
     private volatile ServerState    _state;
     private object                  _sync;
+    private bool                    _autoClose = true;
 
     #endregion
 
@@ -293,6 +294,23 @@ namespace WebSocketSharp.Server
     #endregion
 
     #region Public Properties
+
+
+    /// <summary>
+    /// Gets or sets whether to close http response automatically or not.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if http response should close automatically; otherwise, <c>false</c>.
+    /// </value>
+    public bool AutoClose {
+      get {
+        return _autoClose;
+      }
+      
+      set {
+        _autoClose = value;
+      }
+    }
 
     /// <summary>
     /// Gets the IP address of the server.
@@ -919,7 +937,9 @@ namespace WebSocketSharp.Server
       else
         context.Response.StatusCode = 501; // Not Implemented
 
-      context.Response.Close ();
+      if (AutoClose) { 
+        context.Response.Close ();
+      }
     }
 
     private void processRequest (HttpListenerWebSocketContext context)

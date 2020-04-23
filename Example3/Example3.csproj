@@ -1,13 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net45;net40;netstandard2.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\websocket-sharp\websocket-sharp-customheaders.csproj" />
+    <ProjectReference Include="..\websocket-sharp\WebSocketSharp.CustomHeaders.CustomHttpServer.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Configuration.ConfigurationManager">
+      <Version>4.7.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
+    <Reference Include="System.Configuration" />
   </ItemGroup>
 </Project>

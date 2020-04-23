@@ -1,13 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net45;net40;netstandard2.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\websocket-sharp\websocket-sharp-customheaders.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
+    <ProjectReference Include="..\websocket-sharp\WebSocketSharp.CustomHeaders.CustomHttpServer.csproj" />
   </ItemGroup>
 </Project>
