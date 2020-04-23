@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(LibraryFrameworks)'==''">net45;net40;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LibraryFrameworks)'==''">net45;net40;netstandard2.0;netcoreapp2.0;netcoreapp3.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(LibraryFrameworks)'!=''">$(LibraryFrameworks)</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>WebSocketSharp.CustomHeaders.CustomHttpServer</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.2.1</Version>
     <Description>See https://www.nuget.org/packages/WebSocketSharp for more info.</Description>
     <Authors>jax;felixhao28;sta</Authors>
     <PackageProjectUrl>https://github.com/uhm0311/websocket-sharp</PackageProjectUrl>
