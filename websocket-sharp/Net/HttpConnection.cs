@@ -60,8 +60,6 @@ namespace WebSocketSharp.Net
   {
     #region Private Fields
 
-    private const double _socketLoops = 10.0;
-
     private byte[]                _buffer;
     private const int             _bufferLength = 8192;
     private HttpListenerContext   _context;
@@ -126,23 +124,24 @@ namespace WebSocketSharp.Net
 
     public int SocketConnectionTimeout { 
       get { 
-        return (int)(_socketConnectionTimeout * _socketLoops);
+        return _socketConnectionTimeout;
       }
       
       set { 
-        _socketConnectionTimeout = (int)(value / _socketLoops);
+        _socketConnectionTimeout = value;
       }
     }
 
     public bool IsDisconnected { 
-      get { 
-        bool disconnected = isDisconnected();
+      get {
+        for (int i = 0; i < _socketConnectionTimeout; i++) { 
+          try { return (_socket?.Poll(0, SelectMode.SelectRead) ?? false ) && (_socket?.Available ?? -1) == 0; }
+          catch { }
 
-        for (int i = 0; i < _socketLoops; i++) { 
-          disconnected = disconnected && isDisconnected();
+          Thread.Sleep(1);
         }
-        
-        return disconnected;
+
+        return true;
       }
     }
 
@@ -185,15 +184,6 @@ namespace WebSocketSharp.Net
     #endregion
 
     #region Private Methods
-
-
-    private bool isDisconnected() 
-    { 
-      try { return (_socket?.Poll(_socketConnectionTimeout, SelectMode.SelectRead) ?? false ) && (_socket?.Available ?? -1) == 0; }
-      catch { }
-
-      return true;
-    }
 
     private void close ()
     {

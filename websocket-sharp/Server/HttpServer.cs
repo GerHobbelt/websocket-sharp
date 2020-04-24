@@ -74,7 +74,7 @@ namespace WebSocketSharp.Server
     private volatile ServerState    _state;
     private object                  _sync;
     private bool                    _autoClose = true;
-    private int                     _socketConnectionTimeout = 100000;
+    private int                     _socketConnectionTimeout = 100;
 
     #endregion
 
@@ -297,10 +297,10 @@ namespace WebSocketSharp.Server
     #region Public Properties
 
     /// <summary>
-    /// Gets or sets timeout of long-polling request to client socket in microseconds to check if connection is disconnected or not.
+    /// Gets or sets timeout of long-polling request to client socket in milliseconds to check if connection is disconnected or not.
     /// </summary>
     /// <value>
-    /// Default value is <c>100000</c> which is 0.1 second.
+    /// Default value is <c>100</c> which is 0.1 second.
     /// </value>
     public int SocketConnectionTimeout { 
       get { 
