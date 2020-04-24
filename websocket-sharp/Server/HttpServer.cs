@@ -74,6 +74,7 @@ namespace WebSocketSharp.Server
     private volatile ServerState    _state;
     private object                  _sync;
     private bool                    _autoClose = true;
+    private int                     _socketConnectionTimeout = 100000;
 
     #endregion
 
@@ -295,7 +296,21 @@ namespace WebSocketSharp.Server
 
     #region Public Properties
 
-
+    /// <summary>
+    /// Gets or sets timeout of long-polling request to client socket in microseconds to check if connection is disconnected or not.
+    /// </summary>
+    /// <value>
+    /// Default value is <c>100000</c> which is 0.1 second.
+    /// </value>
+    public int SocketConnectionTimeout { 
+      get { 
+        return _socketConnectionTimeout;
+      }
+      
+      set { 
+        _socketConnectionTimeout = value;
+      }
+    }
     /// <summary>
     /// Gets or sets whether to close http response automatically or not.
     /// </summary>
@@ -911,6 +926,8 @@ namespace WebSocketSharp.Server
 
     private void processRequest (HttpListenerContext context)
     {
+      context.Response.SocketConnectionTimeout = _socketConnectionTimeout;
+      
       var method = context.Request.HttpMethod;
       var evt = method == "GET"
                 ? OnGet
@@ -932,12 +949,15 @@ namespace WebSocketSharp.Server
                                 ? OnPatch
                                 : null;
 
-      if (evt != null)
+      if (evt != null) { 
         evt (this, new HttpRequestEventArgs (context, _docRootPath));
-      else
-        context.Response.StatusCode = 501; // Not Implemented
 
-      if (AutoClose) { 
+        if (_autoClose) { 
+          context.Response.Close ();
+        }
+      }
+      else { 
+        context.Response.StatusCode = 501; // Not Implemented
         context.Response.Close ();
       }
     }
