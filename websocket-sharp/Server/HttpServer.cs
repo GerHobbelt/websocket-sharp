@@ -74,7 +74,7 @@ namespace WebSocketSharp.Server
     private volatile ServerState    _state;
     private object                  _sync;
     private bool                    _autoClose = true;
-    private int                     _pollTimeoutMicroSeconds = 100000;
+    private int                     _socketConnectionTimeout = 100000;
 
     #endregion
 
@@ -297,18 +297,18 @@ namespace WebSocketSharp.Server
     #region Public Properties
 
     /// <summary>
-    /// Gets or sets micro seconds timeout to check if connection is disconnected or not. It cannot be lower than 100.
+    /// Gets or sets timeout of long-polling request to client socket in microseconds to check if connection is disconnected or not.
     /// </summary>
     /// <value>
     /// Default value is <c>100000</c> which is 0.1 second.
     /// </value>
-    public int PollTimeoutMicroSeconds { 
+    public int SocketConnectionTimeout { 
       get { 
-        return _pollTimeoutMicroSeconds;
+        return _socketConnectionTimeout;
       }
       
       set { 
-        _pollTimeoutMicroSeconds = value;
+        _socketConnectionTimeout = value;
       }
     }
     /// <summary>
@@ -926,7 +926,7 @@ namespace WebSocketSharp.Server
 
     private void processRequest (HttpListenerContext context)
     {
-      context.Response.PollTimeoutMicroSeconds = _pollTimeoutMicroSeconds;
+      context.Response.SocketConnectionTimeout = _socketConnectionTimeout;
       
       var method = context.Request.HttpMethod;
       var evt = method == "GET"

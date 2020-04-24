@@ -96,13 +96,13 @@ namespace WebSocketSharp.Net
 
     #region Internal Properties
 
-    internal int PollTimeoutMicroSeconds { 
+    internal int SocketConnectionTimeout { 
       get { 
-        return _context.Connection.PollTimeoutMicroSeconds;
+        return _context.Connection.SocketConnectionTimeout;
       }
       
       set { 
-        _context.Connection.PollTimeoutMicroSeconds = value;
+        _context.Connection.SocketConnectionTimeout = value;
       }
     }
 

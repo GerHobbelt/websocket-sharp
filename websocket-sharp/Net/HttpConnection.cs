@@ -60,6 +60,8 @@ namespace WebSocketSharp.Net
   {
     #region Private Fields
 
+    private const double _socketLoops = 10.0;
+
     private byte[]                _buffer;
     private const int             _bufferLength = 8192;
     private HttpListenerContext   _context;
@@ -81,7 +83,7 @@ namespace WebSocketSharp.Net
     private int                   _timeout;
     private Dictionary<int, bool> _timeoutCanceled;
     private Timer                 _timer;
-    private int                   _pollTimeoutMicroSeconds;
+    private int                   _socketConnectionTimeout;
 
     #endregion
 
@@ -122,17 +124,13 @@ namespace WebSocketSharp.Net
 
     #region Public Properties
 
-    public int PollTimeoutMicroSeconds { 
+    public int SocketConnectionTimeout { 
       get { 
-        return _pollTimeoutMicroSeconds;
+        return (int)(_socketConnectionTimeout * _socketLoops);
       }
       
       set { 
-        if (value < 10) { 
-          throw new ArgumentException("DisconnectionMicroSeconds cannot be lower than 10.", "DisconnectionMicroSeconds");
-        }
-
-        _pollTimeoutMicroSeconds = (int)(value / 10.0);
+        _socketConnectionTimeout = (int)(value / _socketLoops);
       }
     }
 
@@ -140,7 +138,7 @@ namespace WebSocketSharp.Net
       get { 
         bool disconnected = isDisconnected();
 
-        for (int i = 0; i < 10; i++) { 
+        for (int i = 0; i < _socketLoops; i++) { 
           disconnected = disconnected && isDisconnected();
         }
         
@@ -191,7 +189,7 @@ namespace WebSocketSharp.Net
 
     private bool isDisconnected() 
     { 
-      try { return (_socket?.Poll((int)(PollTimeoutMicroSeconds / 10.0), SelectMode.SelectRead) ?? false ) && (_socket?.Available ?? -1) == 0; }
+      try { return (_socket?.Poll(_socketConnectionTimeout, SelectMode.SelectRead) ?? false ) && (_socket?.Available ?? -1) == 0; }
       catch { }
 
       return true;
