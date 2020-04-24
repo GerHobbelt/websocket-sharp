@@ -81,6 +81,7 @@ namespace WebSocketSharp.Net
     private int                   _timeout;
     private Dictionary<int, bool> _timeoutCanceled;
     private Timer                 _timer;
+    private int                   _pollTimeoutMicroSeconds;
 
     #endregion
 
@@ -121,6 +122,32 @@ namespace WebSocketSharp.Net
 
     #region Public Properties
 
+    public int PollTimeoutMicroSeconds { 
+      get { 
+        return _pollTimeoutMicroSeconds;
+      }
+      
+      set { 
+        if (value < 10) { 
+          throw new ArgumentException("DisconnectionMicroSeconds cannot be lower than 10.", "DisconnectionMicroSeconds");
+        }
+
+        _pollTimeoutMicroSeconds = (int)(value / 10.0);
+      }
+    }
+
+    public bool IsDisconnected { 
+      get { 
+        bool disconnected = isDisconnected();
+
+        for (int i = 0; i < 10; i++) { 
+          disconnected = disconnected && isDisconnected();
+        }
+        
+        return disconnected;
+      }
+    }
+
     public bool IsClosed {
       get {
         return _socket == null;
@@ -160,6 +187,15 @@ namespace WebSocketSharp.Net
     #endregion
 
     #region Private Methods
+
+
+    private bool isDisconnected() 
+    { 
+      try { return (_socket?.Poll((int)(PollTimeoutMicroSeconds / 10.0), SelectMode.SelectRead) ?? false ) && (_socket?.Available ?? -1) == 0; }
+      catch { }
+
+      return true;
+    }
 
     private void close ()
     {
