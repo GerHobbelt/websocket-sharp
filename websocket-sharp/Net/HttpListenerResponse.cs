@@ -96,6 +96,16 @@ namespace WebSocketSharp.Net
 
     #region Internal Properties
 
+    internal int SocketConnectionTimeout { 
+      get { 
+        return _context.Connection.SocketConnectionTimeout;
+      }
+      
+      set { 
+        _context.Connection.SocketConnectionTimeout = value;
+      }
+    }
+
     internal bool CloseConnection {
       get {
         return _closeConnection;
@@ -120,6 +130,17 @@ namespace WebSocketSharp.Net
 
     #region Public Properties
 
+    /// <summary>
+    /// Gets whether this connection is disconnected or not.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if connection is disconnected; otherwise, <c>false</c>.
+    /// </value>
+    public bool IsDisconnected {
+      get { 
+        return _context.Connection.IsDisconnected;
+      }
+    }
     /// <summary>
     /// Gets or sets the encoding for the entity body data included in the response.
     /// </summary>
