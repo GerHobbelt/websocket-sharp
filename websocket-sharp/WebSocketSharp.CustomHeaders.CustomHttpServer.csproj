@@ -8,7 +8,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>WebSocketSharp.CustomHeaders.CustomHttpServer</PackageId>
-    <Version>1.0.2.2</Version>
+    <Version>1.0.2.3</Version>
     <Description>See https://www.nuget.org/packages/WebSocketSharp for more info.</Description>
     <Authors>jax;felixhao28;sta</Authors>
     <PackageProjectUrl>https://github.com/uhm0311/websocket-sharp</PackageProjectUrl>
