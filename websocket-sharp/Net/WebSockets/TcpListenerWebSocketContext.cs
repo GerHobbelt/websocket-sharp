@@ -72,11 +72,14 @@ namespace WebSocketSharp.Net.WebSockets
       TcpClient tcpClient,
       string protocol,
       bool secure,
+      bool noDelay,
       ServerSslConfiguration sslConfig,
       Logger log
     )
     {
       _tcpClient = tcpClient;
+      _tcpClient.NoDelay = noDelay;
+
       _secure = secure;
       _log = log;
 
@@ -215,6 +218,7 @@ namespace WebSocketSharp.Net.WebSockets
         return _secure;
       }
     }
+    
 
     /// <summary>
     /// Gets a value indicating whether the request is a WebSocket handshake
