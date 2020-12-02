@@ -195,19 +195,23 @@ namespace WebSocketSharp.Net
       _requestBuffer = null;
     }
 
-    private void disposeStream ()
-    {
-      if (_stream == null)
-        return;
+        private void disposeStream()
+        {
+            if (_stream == null)
+                return;
 
-      _inputStream = null;
-      _outputStream = null;
+            _inputStream = null;
+            _outputStream = null;
 
-      _stream.Dispose ();
-      _stream = null;
-    }
+            try
+            {
+                _stream.Dispose();
+            }
+            catch { }
+            _stream = null;
+        }
 
-    private void disposeTimer ()
+        private void disposeTimer ()
     {
       if (_timer == null)
         return;

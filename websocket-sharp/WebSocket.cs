@@ -112,15 +112,17 @@ namespace WebSocketSharp
     private Uri                            _uri;
     private const string                   _version = "13";
     private TimeSpan                       _waitTime;
+    private int                            _connectTimeout=10000;
+    private int                            _readWriteTimeout = 10000;
 
-    #endregion
+        #endregion
 
-    #region Internal Fields
+        #region Internal Fields
 
-    /// <summary>
-    /// Represents the empty array of <see cref="byte"/> used internally.
-    /// </summary>
-    internal static readonly byte[] EmptyBytes;
+        /// <summary>
+        /// Represents the empty array of <see cref="byte"/> used internally.
+        /// </summary>
+        internal static readonly byte[] EmptyBytes;
 
     /// <summary>
     /// Represents the length used to determine whether the data should be fragmented in sending.
@@ -293,18 +295,55 @@ namespace WebSocketSharp
       }
     }
 
-    #endregion
+        #endregion
 
-    #region Public Properties
+        #region Public Properties
+        /// <summary>
+        /// Gets or sets underlying socket connect timeout.
+        /// </summary>
+        public int ConnectTimeout
+        {
+            get
+            {
+                return _connectTimeout;
+            }
 
-    /// <summary>
-    /// Gets or sets the compression method used to compress a message on the WebSocket connection.
-    /// </summary>
-    /// <value>
-    /// One of the <see cref="CompressionMethod"/> enum values, specifies the compression method
-    /// used to compress a message. The default value is <see cref="CompressionMethod.None"/>.
-    /// </value>
-    public CompressionMethod Compression {
+            set
+            {
+                _connectTimeout = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets underlying socket read or write timeout.
+        /// </summary>
+        public int ReadWriteTimeout
+        {
+            get
+            {
+                return _readWriteTimeout;
+            }
+
+            set
+            {
+                _readWriteTimeout = value;
+
+                if (_tcpClient != null)
+                {
+                    _tcpClient.ReceiveTimeout = value;
+                    _tcpClient.SendTimeout = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the compression method used to compress a message on the WebSocket connection.
+        /// </summary>
+        /// <value>
+        /// One of the <see cref="CompressionMethod"/> enum values, specifies the compression method
+        /// used to compress a message. The default value is <see cref="CompressionMethod.None"/>.
+        /// </value>
+        public CompressionMethod Compression {
       get {
         return _compression;
       }
@@ -1377,12 +1416,17 @@ namespace WebSocketSharp
     // As client
     private void releaseClientResources ()
     {
-      if (_stream != null) {
-        _stream.Dispose ();
-        _stream = null;
-      }
+            if (_stream != null)
+            {
+                try
+                {
+                    _stream.Dispose();
+                }
+                catch { }
+                _stream = null;
+            }
 
-      if (_tcpClient != null) {
+            if (_tcpClient != null) {
         _tcpClient.Close ();
         _tcpClient = null;
       }
@@ -1462,9 +1506,14 @@ namespace WebSocketSharp
           error ("An exception has occurred while sending data.", ex);
         }
         finally {
-          if (compressed)
-            stream.Dispose ();
-
+            if (compressed)
+            {
+                try
+                {
+                    stream.Dispose();
+                }
+                catch { }
+            }
           src.Dispose ();
         }
 
@@ -1661,8 +1710,10 @@ namespace WebSocketSharp
         if (_proxyCredentials != null) {
           if (res.HasConnectionClose) {
             releaseClientResources ();
-            _tcpClient = new TcpClient (_proxyUri.DnsSafeHost, _proxyUri.Port);
-            _stream = _tcpClient.GetStream ();
+            _tcpClient = connectTcpClient(_proxyUri.DnsSafeHost, _proxyUri.Port, _connectTimeout);
+            _tcpClient.ReceiveTimeout = _readWriteTimeout;
+            _tcpClient.SendTimeout = _readWriteTimeout;
+            _stream = _tcpClient.GetStream();
           }
 
           var authRes = new AuthenticationResponse (authChal, _proxyCredentials, 0);
@@ -1683,12 +1734,16 @@ namespace WebSocketSharp
     private void setClientStream ()
     {
       if (_proxyUri != null) {
-        _tcpClient = new TcpClient (_proxyUri.DnsSafeHost, _proxyUri.Port);
+        _tcpClient = connectTcpClient(_proxyUri.DnsSafeHost, _proxyUri.Port, _connectTimeout);
+        _tcpClient.ReceiveTimeout = _readWriteTimeout;
+        _tcpClient.SendTimeout = _readWriteTimeout;
         _stream = _tcpClient.GetStream ();
         sendProxyConnectRequest ();
       }
       else {
-        _tcpClient = new TcpClient (_uri.DnsSafeHost, _uri.Port);
+        _tcpClient = connectTcpClient(_uri.DnsSafeHost, _uri.Port, _connectTimeout);
+        _tcpClient.ReceiveTimeout = _readWriteTimeout;
+        _tcpClient.SendTimeout = _readWriteTimeout;
         _stream = _tcpClient.GetStream ();
       }
 
@@ -1719,8 +1774,39 @@ namespace WebSocketSharp
         }
       }
     }
+        private static TcpClient connectTcpClient(string hostname, int port, int connectTimeout)
+        {
+            var client = new TcpClient();
+            var result = client.BeginConnect(hostname, port, onEndConnect, client);
+            bool success = result.AsyncWaitHandle.WaitOne(connectTimeout, true);
 
-    private void startReceiving ()
+            if (!client.Connected)
+            {
+                client.Close();
+                throw new TimeoutException("Failed to connect server.");
+            }
+
+            return client;
+        }
+
+        private static void onEndConnect(IAsyncResult asyncResult)
+        {
+            TcpClient client = (TcpClient)asyncResult.AsyncState;
+
+            try
+            {
+                client.EndConnect(asyncResult);
+            }
+            catch { }
+
+            try
+            {
+                asyncResult.AsyncWaitHandle.Close();
+            }
+            catch { }
+        }
+
+        private void startReceiving ()
     {
       if (_messageEventQueue.Count > 0)
         _messageEventQueue.Clear ();
