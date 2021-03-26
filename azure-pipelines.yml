@@ -8,6 +8,9 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- bash: |
+    VERSION_NAME=$(echo $(Build.SourceBranchName) | sed -nr 's/^v(([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*).*)$/\1/p')
+    echo "##vso[task.setvariable variable=versionName]$VERSION_NAME"
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
@@ -16,7 +19,7 @@ steps:
     command: 'pack'
     packagesToPack: '**/*.csproj'
     versioningScheme: 'byEnvVar'
-    versionEnvVar: 'Build.SourceBranchName'
+    versionEnvVar: 'versionName'
 - task: DotNetCoreCLI@2
   inputs:
     command: 'push'
