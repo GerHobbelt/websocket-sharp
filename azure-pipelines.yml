@@ -1,0 +1,25 @@
+trigger:
+- refs/tags/v*
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/*.csproj'
+    versioningScheme: 'byEnvVar'
+    versionEnvVar: '$(Build.SourceBranchName)'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: '3d926345-c8d9-4b4e-a837-6fc0b8eb892a'
